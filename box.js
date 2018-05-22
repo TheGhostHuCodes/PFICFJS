@@ -1,10 +1,3 @@
-// const nextCharForNumberString = str => {
-//     const trimmed = str.trim()
-//     const number = parseInt(trimmed)
-//     const nextNumber = number + 1
-//     return String.fromCharCode(nextNumber)
-// }
-
 const Box = x =>
     ({
         map: f => Box(f(x)),
@@ -12,14 +5,22 @@ const Box = x =>
         inspect: () => `Box(${x})`
     })
 
-const nextCharForNumberString = str =>
+const moneyToFloat = str =>
     Box(str)
-        .map(s => s.trim())
-        .map(s => parseInt(s))
-        .map(i => i + 1)
-        .map(i => String.fromCharCode(i))
-        .fold(c => c.toLowerCase())
+        .map(s => s.replace(/\$/g, ''))
+        .map(r => parseFloat(r))
 
-const result = nextCharForNumberString('  64 ')
+const percentToFloat = str =>
+    Box(str.replace(/\%/g, ''))
+        .map(replaced => parseFloat(replaced))
+        .map(number => number * 0.01)
 
+const applyDiscount = (price, discount) =>
+    moneyToFloat(price)
+        .fold(cost =>
+            percentToFloat(discount)
+                .fold(savings =>
+                    cost - cost * savings))
+
+const result = applyDiscount('$5.00', '20%')
 console.log(result)
